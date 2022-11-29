@@ -7,8 +7,8 @@
 class GraphicText
 {
 private:
-	Graphics& gfx;
-	int paper;
+	Color* pPaper;
+	int2 paperDim;
 	const char CharacterWidth;
 	const char CharacterHeight;
 	std::vector<std::vector<bool>> CharBitmaps;
@@ -27,8 +27,10 @@ private:
 	bool isUsingTexture;
 public:
 	GraphicText() = delete;
-	GraphicText(Graphics& gfx, int layer = 0);
-	GraphicText(Graphics& gfx, int layer, Image charset, char2 charTableDim, char startChar, int2 cursor_pos = { 0,0 }, Color txtColor = Colors::White, int txtScale = 1, bool double_spaced = false, bool autoCursor = true, bool lineFeed = true, int2 tl_margins = { 0,0 }, int2 br_margins = { 0,0 }, std::optional<Image> txtTexture = std::optional<Image>());
+	GraphicText(const GraphicText& gfc_text) = delete;
+	GraphicText operator =(const GraphicText& gfc_text) = delete;
+	GraphicText(Color* p_paper, int2 paper_dim);
+	GraphicText(Color* p_paper, int2 paper_dim, Image charset, char2 charTableDim, char startChar, int2 cursor_pos = { 0,0 }, Color txtColor = Colors::White, int txtScale = 1, bool double_spaced = false, bool autoCursor = true, bool lineFeed = true, int2 tl_margins = { 0,0 }, int2 br_margins = { 0,0 }, std::optional<Image> txtTexture = std::optional<Image>());
 	void SetTopLeftMargins(const int2& tl_margins);
 	void SetBottomRightMargins(const int2& br_margins);
 	const int2& GetTopLeftMargins() const;
@@ -63,7 +65,5 @@ public:
 	void LineFeedUp();
 	void LineFeedDown();
 	void ClearText();
+	~GraphicText();
 };
-
-
-

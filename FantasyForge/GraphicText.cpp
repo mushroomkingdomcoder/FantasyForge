@@ -1,15 +1,15 @@
 #include "GraphicText.h"
 #include <assert.h>
 
-GraphicText::GraphicText(Graphics& gfx, int layer)
+GraphicText::GraphicText(Color* p_paper, int2 paper_dim)
 	:
-	gfx(gfx),
-	paper(layer),
+	pPaper(p_paper),
+	paperDim(paper_dim),
 	CharacterWidth(16),
 	CharacterHeight(16),
 	startChar(32),
 	charTableDim({ 16,6 }),
-	cursorLimit({ gfx.GetWidth(paper) / CharacterWidth, gfx.GetHeight(paper) / CharacterHeight }),
+	cursorLimit({ paperDim.x / CharacterWidth, paperDim.y / CharacterHeight }),
 	tlMargins({ 0,0 }),
 	brMargins({ 0,0 }),
 	Cursor({ 0,0 }),
@@ -40,15 +40,15 @@ GraphicText::GraphicText(Graphics& gfx, int layer)
 	} 
 }
 
-GraphicText::GraphicText(Graphics& gfx, int layer, Image charset, char2 charTableDim, char startChar, int2 cursor_pos, Color txtColor, int txtScale, bool doubleSpaced, bool auto_cursor, bool line_feed, int2 tl_margins, int2 br_margins, std::optional<Image> txtTexture)
+GraphicText::GraphicText(Color* p_paper, int2 paper_dim, Image charset, char2 charTableDim, char startChar, int2 cursor_pos, Color txtColor, int txtScale, bool doubleSpaced, bool auto_cursor, bool line_feed, int2 tl_margins, int2 br_margins, std::optional<Image> txtTexture)
 	:
-	gfx(gfx),
-	paper(layer),
+	pPaper(p_paper),
+	paperDim(paper_dim),
 	CharacterWidth(charset.GetWidth() / charTableDim.x),
 	CharacterHeight(charset.GetHeight() / charTableDim.y),
 	startChar(startChar),
 	charTableDim(charTableDim),
-	cursorLimit({ gfx.GetWidth(paper) / (CharacterWidth * txtScale),gfx.GetHeight(paper) / (CharacterHeight * txtScale) }),
+	cursorLimit({ paperDim.x / (CharacterWidth * txtScale),paperDim.y / (CharacterHeight * txtScale) }),
 	tlMargins(tl_margins),
 	brMargins(br_margins),
 	Cursor(cursor_pos),
@@ -228,10 +228,10 @@ const Color& GraphicText::GetTextColor() const
 
 void GraphicText::SetTextScale(int scale)
 {
-	assert(CharacterWidth * scale < (gfx.GetWidth(paper) - ((tlMargins.x + brMargins.x) * scale)));
-	assert(CharacterHeight * scale < (gfx.GetHeight(paper) - ((tlMargins.y + brMargins.y) * scale)));
+	assert(CharacterWidth * scale < (paperDim.x - ((tlMargins.x + brMargins.x) * scale)));
+	assert(CharacterHeight * scale < (paperDim.y - ((tlMargins.y + brMargins.y) * scale)));
 	TextScale = scale;
-	cursorLimit = { gfx.GetWidth(paper) / (CharacterWidth * TextScale),gfx.GetHeight(paper) / (CharacterHeight * TextScale) };
+	cursorLimit = { paperDim.x / (CharacterWidth * TextScale),paperDim.y / (CharacterHeight * TextScale) };
 }
 
 const int& GraphicText::GetTextScale() const
@@ -351,18 +351,18 @@ void GraphicText::Write(std::string text)
 		X = Cursor.x * (CharacterWidth * TextScale);
 		for (int y = 0; y < CharacterHeight * TextScale; ++y)
 		{
-			const int yPxl = (Y + y) * gfx.GetWidth(paper);
+			const int yPxl = (Y + y) * paperDim.x;
 			const int yBit = (y / TextScale) * CharacterWidth;
 			for (int x = 0; x < CharacterWidth * TextScale; ++x)
 			{
 				if (isUsingTexture)
 				{
 					const int xBit = x / TextScale;
-					gfx.GetPixelMap(paper)[yPxl + (X + x)] = (TextTexture->GetPtrToImage()[yBit + xBit] * (float)CharBitmaps[text[i]][yBit + xBit]);
+					pPaper[yPxl + (X + x)] = (TextTexture->GetPtrToImage()[yBit + xBit] * (float)CharBitmaps[text[i]][yBit + xBit]);
 				}
 				else
 				{
-					gfx.GetPixelMap(paper)[yPxl + (X + x)] = (TextColor * (float)CharBitmaps[text[i]][yBit + (x / TextScale)]);
+					pPaper[yPxl + (X + x)] = (TextColor * (float)CharBitmaps[text[i]][yBit + (x / TextScale)]);
 				}
 			}
 		}
@@ -402,12 +402,12 @@ void GraphicText::LineFeedUp()
 	const int pitchBytes = (endX - startX) * sizeof(Color);
 	for (int y = startY; y < endY; ++y)
 	{
-		memcpy(&gfx.GetPixelMap(paper)[(y - lineHeight) * gfx.GetWidth(paper) + startX], &gfx.GetPixelMap(paper)[y * gfx.GetWidth(paper) + startX], pitchBytes);
+		memcpy(&pPaper[(y - lineHeight) * paperDim.x + startX], &pPaper[y * paperDim.x + startX], pitchBytes);
 	}
 	startY = endY - lineHeight;
 	for (int y = startY; y < endY; ++y)
 	{
-		memset(&gfx.GetPixelMap(paper)[y * gfx.GetWidth(paper) + startX], 0, pitchBytes);
+		memset(&pPaper[y * paperDim.x + startX], 0, pitchBytes);
 	}
 }
 
@@ -421,12 +421,12 @@ void GraphicText::LineFeedDown()
 	const int pitchBytes = (endX - startX) * sizeof(Color);
 	for (int y = startY - 1; y >= endY; --y)
 	{
-		memcpy(&gfx.GetPixelMap(paper)[(y + lineHeight) * gfx.GetWidth(paper) + startX], &gfx.GetPixelMap(paper)[y * gfx.GetWidth(paper) + startX], pitchBytes);
+		memcpy(&pPaper[(y + lineHeight) * paperDim.x + startX], &pPaper[y * paperDim.x + startX], pitchBytes);
 	}
 	startY = endY + lineHeight;
 	for (int y = startY - 1; y >= endY; --y)
 	{
-		memset(&gfx.GetPixelMap(paper)[y * gfx.GetWidth(paper) + startX], 0, pitchBytes);
+		memset(&pPaper[y * paperDim.x + startX], 0, pitchBytes);
 	}
 }
 
@@ -440,9 +440,14 @@ void GraphicText::ClearText()
 	const int pitchBytes = (endX - startX) * sizeof(Color);
 	for (int y = startY; y < endY; ++y)
 	{
-		memset(&gfx.GetPixelMap(paper)[y * gfx.GetWidth(paper) + startX], 0, pitchBytes);
+		memset(&pPaper[y * paperDim.x + startX], 0, pitchBytes);
 	}
 	Cursor = { tlMargins.x,tlMargins.y };
+}
+
+GraphicText::~GraphicText()
+{
+	pPaper = nullptr;
 }
 
 

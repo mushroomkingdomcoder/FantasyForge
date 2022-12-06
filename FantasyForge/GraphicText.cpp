@@ -321,8 +321,7 @@ bool GraphicText::isUsingTextColor() const
 
 void GraphicText::Write(std::string text)
 {
-	int Y;
-	int X;
+	int Y, X;
 	for (int i = 0; i < text.length(); ++i)
 	{
 		bool isBackspace = false;
@@ -375,6 +374,35 @@ void GraphicText::Write(std::string text)
 			if (autoCursor && !isDelete)
 			{
 				CursorRight();
+			}
+		}
+	}
+}
+
+void GraphicText::FreeformWrite(std::string text, int x, int y)
+{
+	int Y = y;
+	for (int i = 0; i < text.length(); ++i)
+	{
+		assert(text[i] >= startChar);
+		assert(text[i] < startChar + charTableDim.x * charTableDim.y);
+		text[i] -= startChar;
+		int X = x + i * (CharacterWidth * TextScale);
+		for (int y = 0; y < CharacterHeight * TextScale; ++y)
+		{
+			const int yPxl = (Y + y) * paperDim.x;
+			const int yBit = (y / TextScale) * CharacterWidth;
+			for (int x = 0; x < CharacterWidth * TextScale; ++x)
+			{
+				if (isUsingTexture)
+				{
+					const int xBit = x / TextScale;
+					pPaper[yPxl + (X + x)] = (TextTexture->GetPtrToImage()[yBit + xBit] * (float)CharBitmaps[text[i]][yBit + xBit]);
+				}
+				else
+				{
+					pPaper[yPxl + (X + x)] = (TextColor * (float)CharBitmaps[text[i]][yBit + (x / TextScale)]);
+				}
 			}
 		}
 	}
@@ -449,6 +477,3 @@ GraphicText::~GraphicText()
 {
 	pPaper = nullptr;
 }
-
-
-

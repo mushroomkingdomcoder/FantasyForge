@@ -1,5 +1,6 @@
 #pragma once
 #include "Graphics.h"
+#include "Rect.h"
 #include <vector>
 #include <memory>
 #include <functional>
@@ -14,11 +15,12 @@ public:
 	Image() = default;
 	Image(const Image& image);
 	Image& operator =(const Image& image);
-	Image(int width, int height);
+	Image(int width, int height, Color color = Colors::White);
 	Image(const char* filename);
 	Image(const std::vector<Color>& image, int image_width);
 	int GetWidth() const;
 	int GetHeight() const;
+	iRect GetRect(int x = 0, int y = 0) const;
 	const Color* GetPtrToImage() const;
 	void SetPixel(int x, int y, const Color& color);
 	const Color& GetPixel(int x, int y) const;
@@ -76,4 +78,3 @@ namespace ImageEffects
 	Color FlipV(const Image& image, int img_x, int img_y, int img_pxl);
 	Color FlipHV(const Image& image, int img_x, int img_y, int img_pxl);
 }
-

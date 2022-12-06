@@ -25,12 +25,17 @@ Image& Image::operator=(const Image& image)
 	return *this;
 }
 
-Image::Image(int width, int height)
+Image::Image(int width, int height, Color color)
 	:
 	width(width),
 	height(height),
 	pImage(std::make_unique<Color[]>(width * height))
-{}
+{
+	for (int i = 0; i < width * height; ++i)
+	{
+		pImage[i] = color;
+	}
+}
 
 Image::Image(const char* filename)
 {
@@ -124,6 +129,11 @@ int Image::GetWidth() const
 int Image::GetHeight() const
 {
 	return height;
+}
+
+iRect Image::GetRect(int x, int y) const
+{
+	return iRect(vec2i(x, y), width, height);
 }
 
 const Color* Image::GetPtrToImage() const

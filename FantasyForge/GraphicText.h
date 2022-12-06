@@ -61,6 +61,7 @@ public:
 	void UseTextColor();
 	bool isUsingTextColor() const;
 	void Write(std::string text);
+	void FreeformWrite(std::string text, int x, int y);
 	void PutChar(const char& chr, int2 pos);
 	void LineFeedUp();
 	void LineFeedDown();

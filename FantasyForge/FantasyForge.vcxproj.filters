@@ -40,6 +40,9 @@
     <Filter Include="Graphics\Shaders\Pixel">
       <UniqueIdentifier>{52e0be08-e38b-46e9-b307-a599efdadfd1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics\Bitmap">
+      <UniqueIdentifier>{26aa23de-5ee3-456f-bd61-f6ef7bc1ae87}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Animation.cpp">
@@ -102,11 +105,11 @@
     <ClCompile Include="UserInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Field.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Animation.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="BaseException.h">
       <Filter>App</Filter>
     </ClInclude>
@@ -128,9 +131,6 @@
     <ClInclude Include="GraphicText.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Image.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Keyboard.h">
       <Filter>Input</Filter>
     </ClInclude>
@@ -146,9 +146,6 @@
     <ClInclude Include="NDCCamera2D.h">
       <Filter>Graphics\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="Rect.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Shaders.h">
       <Filter>Graphics\Shaders</Filter>
     </ClInclude>
@@ -158,14 +155,8 @@
     <ClInclude Include="SoundSystem.h">
       <Filter>Sound</Filter>
     </ClInclude>
-    <ClInclude Include="Sprite.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="SVG.h">
       <Filter>Graphics\SVGs</Filter>
-    </ClInclude>
-    <ClInclude Include="Tile.h">
-      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Transformable.h">
       <Filter>Graphics\SVGs</Filter>
@@ -187,6 +178,24 @@
     </ClInclude>
     <ClInclude Include="UserInterface.h">
       <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Tile.h">
+      <Filter>Graphics\Bitmap</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>Graphics\Bitmap</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
+      <Filter>Graphics\Bitmap</Filter>
+    </ClInclude>
+    <ClInclude Include="Rect.h">
+      <Filter>Graphics\Bitmap</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Graphics\Bitmap</Filter>
+    </ClInclude>
+    <ClInclude Include="Field.h">
+      <Filter>Graphics\Bitmap</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,9 @@
 #include "Window.h"
 #include <assert.h>
 
+#define WNDEXCPT Window::Exception(__LINE__, __FILE__, GetLastError())
+#define WNDEXCPT_NOTE(note) Window::Exception(__LINE__, __FILE__, GetLastError(), note)
+
 LRESULT WINAPI Window::WndMsgSetup(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	if (Msg == WM_NCCREATE)
@@ -123,6 +126,31 @@ LRESULT Window::WindowMessageProceedure(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 			mouse.OnWheelScroll(z);
 			break;
 		}
+		case WM_SIZE:
+		{
+			if (wParam != SIZE_MINIMIZED)
+			{
+				if (pseudoFullscreen)
+				{
+					SetWindowDimensions(width, height);
+					pseudoFullscreen = true;
+				}
+				else if (pGFX)
+				{
+					int newWidth = lParam & 0x0000FFFF;
+					if (!newWidth) newWidth = 1;
+					int newHeight = (lParam & 0xFFFF0000) >> 16;
+					if (!newHeight) newHeight = 1;
+					float xScale = float((float)newWidth / (float)width);
+					float yScale = float((float)newHeight / (float)height);
+					pGFX->UpdateViewportsAndFrameManager(xScale, yScale);
+					width = newWidth;
+					height = newHeight;
+					pseudoFullscreen = false;
+				}
+			}
+			break;
+		}
 		case WM_KILLFOCUS:
 		{
 			kbd.ClearKeystates();
@@ -137,8 +165,9 @@ LRESULT Window::WindowMessageProceedure(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
 	return DefWindowProc(hWnd, Msg, wParam, lParam);
 }
 
-Window::Window(int w, int h, std::string _title, std::vector<int2> display_layer_dims)
+Window::Window(int w, int h, std::string _title, std::vector<int2> display_layer_dims, DWORD style)
 	:
+	style(style),
 	width(w),
 	height(h),
 	title(_title),
@@ -150,12 +179,12 @@ Window::Window(int w, int h, std::string _title, std::vector<int2> display_layer
 	window.right = width;
 	window.top = 0;
 	window.bottom = height;
-	if (AdjustWindowRect(&window, WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION, FALSE) == 0)
+	if (!AdjustWindowRect(&window, style, FALSE))
 	{
 		throw WNDEXCPT_NOTE("Failed to adjust window dimensions!");
 	}
 	hWnd = CreateWindowEx(
-		0, wndcls.GetName(), title.c_str(), WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION, CW_USEDEFAULT, CW_USEDEFAULT,
+		0, wndcls.GetName(), title.c_str(), style, CW_USEDEFAULT, CW_USEDEFAULT,
 		window.right - window.left, window.bottom - window.top, nullptr, nullptr, wndcls.GetInstance(), this);
 	if (!hWnd)
 	{
@@ -172,16 +201,6 @@ Window::Window(int w, int h, std::string _title, std::vector<int2> display_layer
 	pGFX = std::make_unique<Graphics>(hWnd, width, height, display_layer_dims);
 }
 
-const int& Window::GetWidth() const
-{
-	return width;
-}
-
-const int& Window::GetHeight() const
-{
-	return height;
-}
-
 std::string Window::GetWindowTitle() const
 {
 	return title;
@@ -191,6 +210,68 @@ void Window::SetWindowTitle(const std::string& _title)
 {
 	title = _title;
 	SetWindowText(hWnd, title.c_str());
+}
+
+void Window::SetWindowPosition(int x, int y)
+{
+	if (!SetWindowPos(hWnd, HWND_TOP, x, y, width, height, SWP_NOSIZE))
+	{
+		throw WNDEXCPT_NOTE("Failed setting new window position!");
+	}
+	pseudoFullscreen = false;
+}
+
+int2 Window::GetWindowPosition() const
+{
+	RECT winRect;
+	GetWindowRect(hWnd, &winRect);
+	return { winRect.left,winRect.top };
+}
+
+void Window::SetWindowDimensions(int width, int height)
+{
+	RECT window = {};
+	window.left = 0;
+	window.right = width;
+	window.top = 0;
+	window.bottom = height;
+	if (!AdjustWindowRect(&window, style, FALSE))
+	{
+		throw WNDEXCPT_NOTE("Failed to adjust window dimensions!");
+	}
+	if (!SetWindowPos(hWnd, HWND_TOP, 0, 0, window.right - window.left, window.bottom - window.top, SWP_NOMOVE | SWP_NOSENDCHANGING))
+	{
+		throw WNDEXCPT_NOTE("Failed setting new window dimensions!");
+	}
+}
+
+int2 Window::GetWindowDimensions() const
+{
+	return { width,height };
+}
+
+void Window::SetPseudoFullscreen()
+{
+	assert(!pGFX->isFullscreen());
+	RECT window = {};
+	if (!AdjustWindowRect(&window, style, FALSE))
+	{
+		throw WNDEXCPT_NOTE("Failed to adjust window dimensions!");
+	}
+	SetWindowPosition(window.left, window.top);
+	HMONITOR hMon = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+	MONITORINFO mInfo = { sizeof(mInfo) };
+	if (!GetMonitorInfo(hMon, &mInfo))
+	{
+		throw WNDEXCPT_NOTE("Failed retriving display monitor info!");
+	}
+	SetWindowDimensions(mInfo.rcMonitor.right - mInfo.rcMonitor.left, mInfo.rcMonitor.bottom - mInfo.rcMonitor.top);
+	pseudoFullscreen = true;
+}
+
+bool Window::isPseudoFullscreen() const
+{
+	return pseudoFullscreen;
 }
 
 Window::~Window()

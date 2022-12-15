@@ -197,7 +197,7 @@ public:
 	}
 	Rect& ClipTo(const Rect& rect)
 	{
-		return *this = this->ClippedToRect(rect);
+		return *this = this->ClippedTo(rect);
 	}
 	void Draw(Graphics& gfx, const Color& color, int layer = 0) const
 	{

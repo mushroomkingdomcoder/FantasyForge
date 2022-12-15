@@ -17,6 +17,7 @@ using uRect = Rect<int>;
 
 class Graphics
 {
+	friend class Window;
 public:
 	class Exception : public BaseException
 	{
@@ -132,6 +133,8 @@ private:
 	mutable D3D11_MAPPED_SUBRESOURCE msr = {};
 	std::vector<Layer> Layers;
 	float4 fBackgroundColorRGBA = { 0.0f,0.0f,0.0f,1.0f };
+private:
+	void UpdateViewportsAndFrameManager(float win_x_scale, float win_y_scale);
 public:
 	Graphics() = delete;
 	Graphics(const Graphics& gfx) = delete;
@@ -148,6 +151,7 @@ public:
 	void StopRendering(int layer = 0);
 	void EnableBilinearFiltering(int layer = 0);
 	void DisableBilinearFiltering(int layer = 0);
+	int GetLayerCount() const;
 	void SetPixelShader(const Shader& shader, int layer = 0);
 	void SetVertexShader(const Shader& shader, int layer = 0);
 	template <typename cbuffer>
@@ -198,6 +202,9 @@ public:
 	void DrawLine(vec2i p0, vec2i p1, std::function<Color(int, int)> color_func, int layer = 0);
 	void DrawCircle(int x, int y, int r, const Color& color, int layer = 0);
 	void DrawCircle(int x, int y, int r, std::function<Color(int, int)> color_func, int layer = 0);
+	void SetFullscreen();
+	void ExitFullscreen();
+	bool isFullscreen();
 	const int& GetWidth(int layer = 0) const;
 	const int& GetHeight(int layer = 0) const;
 	int GetViewWidth(int layer = 0) const;
@@ -241,4 +248,3 @@ public:
 	mat3 GetWorldToPixelMapTransformMatrix(int layer = 0) const;
 	mat3 GetPixelMapToWorldTransformMatrix(int layer = 0) const;
 };
-

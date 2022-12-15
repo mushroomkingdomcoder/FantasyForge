@@ -6,6 +6,23 @@
 
 using namespace Microsoft::WRL;
 
+void Graphics::UpdateViewportsAndFrameManager(float win_x_scale, float win_y_scale)
+{
+	for (Layer& layer : Layers)
+	{
+		layer.viewport.TopLeftX *= win_x_scale;
+		layer.viewport.TopLeftY *= win_y_scale;
+		layer.viewport.Width *= win_x_scale;
+		layer.viewport.Height *= win_y_scale;
+	}
+	pFrameBufferView->Release();
+	GFXCHECK(pFrameManager->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0));
+	ComPtr<ID3D11Resource> pBackBuffer = nullptr;
+	GFXCHECK(pFrameManager->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer));
+	GFXCHECK(pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, pFrameBufferView.GetAddressOf()));
+	pPipeline->OMSetRenderTargets(1, pFrameBufferView.GetAddressOf(), nullptr);
+}
+
 Graphics::Graphics(HWND hWnd, int WindowWidth, int WindowHeight, std::vector<int2> display_layer_dims)
 {
 	for (const int2& dld : display_layer_dims)
@@ -278,6 +295,11 @@ void Graphics::DisableBilinearFiltering(int layer)
 	GFXCHECK(pDevice->CreateSamplerState(&smd, &Layers[layer].pSampler));
 }
 
+int Graphics::GetLayerCount() const
+{
+	return (int)Layers.size();
+}
+
 void Graphics::SetPixelShader(const Shader& shader, int layer)
 {
 	GFXCHECK(pDevice->CreatePixelShader(shader.GetByteCode(), shader.GetByteCodeSize(), nullptr, &Layers[layer].pPShader));
@@ -494,6 +516,23 @@ void Graphics::DrawCircle(int x, int y, int r, std::function<Color(int, int)> co
 			}
 		}
 	}
+}
+
+void Graphics::SetFullscreen()
+{
+	GFXCHECK(pFrameManager->SetFullscreenState(true, nullptr));
+}
+
+void Graphics::ExitFullscreen()
+{
+	GFXCHECK(pFrameManager->SetFullscreenState(false, nullptr));
+}
+
+bool Graphics::isFullscreen()
+{
+	BOOL isFullscreen;
+	GFXCHECK(pFrameManager->GetFullscreenState(&isFullscreen, nullptr));
+	return isFullscreen;
 }
 
 const int& Graphics::GetWidth(int layer) const
@@ -713,7 +752,14 @@ mat4 Graphics::GetPostTransformMatrix(int layer) const
 
 mat4 Graphics::GetAspectCorrectionMatrix(int layer) const
 {
-	return mat4::Scaling(GetAspectRatio(layer) * GetInvViewAspectRatio(layer), 1.0f, 1.0f, 1.0f);
+	if (GetViewAspectRatio(layer) > GetAspectRatio(layer))
+	{
+		return mat4::Scaling(GetAspectRatio(layer) * GetInvViewAspectRatio(layer), 1.0f, 1.0f, 1.0f);
+	}
+	else
+	{
+		return mat4::Scaling(1.0f, GetInvAspectRatio(layer) * GetViewAspectRatio(layer), 1.0f, 1.0f);
+	}
 }
 
 mat3 Graphics::GetWorldToPixelMapTransformMatrix(int layer) const
@@ -729,6 +775,5 @@ mat3 Graphics::GetPixelMapToWorldTransformMatrix(int layer) const
 		mat3::Translation(-(float)Layers[layer].width / 2.0f, -(float)Layers[layer].height / 2.0f) *
 		mat3::Scaling(1.0f, -1.0f, 1.0f);
 }
-
 
 

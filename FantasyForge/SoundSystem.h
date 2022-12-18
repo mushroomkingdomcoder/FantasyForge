@@ -7,7 +7,6 @@
 #include <bitset>
 #include <assert.h>
 #include <optional>
-
 #pragma comment(lib, "xaudio2.lib")
 
 class SoundSystem
@@ -192,3 +191,4 @@ public:
 	float GetMasterVolume() const;
 	~SoundSystem();
 };
+

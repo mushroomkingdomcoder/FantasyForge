@@ -214,6 +214,7 @@ void Window::SetWindowTitle(const std::string& _title)
 
 void Window::SetWindowPosition(int x, int y)
 {
+	assert(!pGFX->isFullscreen());
 	if (!SetWindowPos(hWnd, HWND_TOP, x, y, width, height, SWP_NOSIZE))
 	{
 		throw WNDEXCPT_NOTE("Failed setting new window position!");
@@ -230,6 +231,7 @@ int2 Window::GetWindowPosition() const
 
 void Window::SetWindowDimensions(int width, int height)
 {
+	assert(!pGFX->isFullscreen());
 	RECT window = {};
 	window.left = 0;
 	window.right = width;

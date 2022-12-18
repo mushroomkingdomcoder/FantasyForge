@@ -16,6 +16,7 @@ private:
 	void hasStarted(SoundSystem::Channel& channel);
 	void hasTerminated();
 public:
+	Sound() = delete;
 	Sound(const char* fileName, float freqMod = 1.0f, float volume = 1.0f);
 	Sound(const Sound& sound) = delete;
 	Sound operator =(const Sound& sound) = delete;
@@ -34,6 +35,5 @@ public:
 	bool isPlaying() const;
 	~Sound();
 };
-
 
 

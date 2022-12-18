@@ -58,27 +58,27 @@ public:
 	static Shader PointLight;
 	static Shader Flashlight;
 	static Shader DirectionalLight;
-	static bool shadersAreLoaded;
-public:
+private:
 	PSS()
 	{
-		assert(!shadersAreLoaded);
-		{
-			Default.			LoadShaderFile(	L"DefPixelShader.cso"		);
-			InverseColor.		LoadShaderFile(	L"InverseColorPS.cso"		);
-			Brightness.			LoadShaderFile(	L"Brightness.cso"			);
-			Silhouette.			LoadShaderFile(	L"SilhouettePS.cso"			);
-			Mosaic.				LoadShaderFile(	L"MosaicPS.cso"				);
-			CircularWindow.		LoadShaderFile(	L"CircularWindowPS.cso"		);
-			RectWindow.			LoadShaderFile(	L"RectWindowPS.cso"			);
-			HFlip.				LoadShaderFile(	L"HFlipPS.cso"				);
-			VFlip.				LoadShaderFile(	L"VFlipPS.cso"				);
-			HVFlip.				LoadShaderFile(	L"HVFlipPS.cso"				);
-			PointLight.			LoadShaderFile(	L"PointLightPS.cso"			);
-			Flashlight.			LoadShaderFile(	L"FlashlightPS.cso"			);
-			DirectionalLight.	LoadShaderFile(	L"DirectionalLightPS.cso"	);
-		}
-		shadersAreLoaded = true;
+		Default.			LoadShaderFile(	L"DefPixelShader.cso"		);
+		InverseColor.		LoadShaderFile(	L"InverseColorPS.cso"		);
+		Brightness.			LoadShaderFile(	L"Brightness.cso"			);
+		Silhouette.			LoadShaderFile(	L"SilhouettePS.cso"			);
+		Mosaic.				LoadShaderFile(	L"MosaicPS.cso"				);
+		CircularWindow.		LoadShaderFile(	L"CircularWindowPS.cso"		);
+		RectWindow.			LoadShaderFile(	L"RectWindowPS.cso"			);
+		HFlip.				LoadShaderFile(	L"HFlipPS.cso"				);
+		VFlip.				LoadShaderFile(	L"VFlipPS.cso"				);
+		HVFlip.				LoadShaderFile(	L"HVFlipPS.cso"				);
+		PointLight.			LoadShaderFile(	L"PointLightPS.cso"			);
+		Flashlight.			LoadShaderFile(	L"FlashlightPS.cso"			);
+		DirectionalLight.	LoadShaderFile(	L"DirectionalLightPS.cso"	);
+	}
+public:
+	static void Load()
+	{
+		static PSS pixelShaders;
 	}
 };
 inline Shader PSS::Default;
@@ -94,7 +94,6 @@ inline Shader PSS::HVFlip;
 inline Shader PSS::PointLight;
 inline Shader PSS::Flashlight;
 inline Shader PSS::DirectionalLight;
-inline bool PSS::shadersAreLoaded = false;
 
 /*
 
@@ -107,21 +106,20 @@ class VSS
 public:
 	static Shader Default;
 	static Shader Transform;
-	static bool shadersAreLoaded;
-public:
+private:
 	VSS()
 	{
-		assert(!shadersAreLoaded);
-		{
-			Default.			LoadShaderFile(	L"DefVertexShader.cso"	);
-			Transform.			LoadShaderFile(	L"TransformVS.cso"		);
-		}
-		shadersAreLoaded = true;
+		Default.			LoadShaderFile(	L"DefVertexShader.cso"	);
+		Transform.			LoadShaderFile(	L"TransformVS.cso"		);
+	}
+public:
+	static void Load()
+	{
+		static VSS vertexShaders;
 	}
 };
 inline Shader VSS::Default;
 inline Shader VSS::Transform;
-inline bool VSS::shadersAreLoaded = false;
 
 /*
 
@@ -448,7 +446,4 @@ namespace CBUFs
 		};
 	}
 }
-
-
-
 

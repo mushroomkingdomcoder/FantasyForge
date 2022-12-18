@@ -5,7 +5,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
 	try
 	{
-		PSS(); VSS();
+		PSS::Load(); VSS::Load();
 		Engine FantasyForge;
 		while (true)
 		{

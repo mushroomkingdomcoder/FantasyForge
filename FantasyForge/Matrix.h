@@ -109,7 +109,7 @@ using mat2d = Matrix2D<double>;
 
 /*
 
-	Matrix 3D
+	Matrix3D
 
 */
 

@@ -26,7 +26,7 @@ public:
 			type(type)
 		{}
 	public:
-		bool isEndOfQueue()
+		bool isEndOfQueue() const
 		{
 			return !type;
 		}

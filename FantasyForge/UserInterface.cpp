@@ -1,6 +1,6 @@
 #include "UserInterface.h"
 
-UserInterface::UserInterface(Graphics& gfx, std::string text_font, char2 char_table_dim, int start_char, int layer)
+UserInterface::UserInterface(Graphics& gfx, std::wstring text_font, char2 char_table_dim, int start_char, int layer)
 	:
 	gfx(gfx),
 	layer(layer),
@@ -9,18 +9,66 @@ UserInterface::UserInterface(Graphics& gfx, std::string text_font, char2 char_ta
 	drawFlag(true)
 {}
 
-void UserInterface::AddInterface(std::unique_ptr<Object>& pInterface)
+void UserInterface::AddInterfaces(std::vector<std::unique_ptr<Object>*> ppInterfaces)
 {
-	assert(pInterface != nullptr);
-	pObjects.emplace_back(std::move(pInterface));
+	for (auto& ppInterface : ppInterfaces)
+	{
+		assert(ppInterface); assert(*ppInterface);
+		pObjects.emplace_back(std::move(*ppInterface));
+	}
+}
+
+void UserInterface::DisableInterfaces(std::vector<int> indicies)
+{
+	for (int& index : indicies)
+	{
+		assert(index >= 0 && index < pObjects.size());
+		pObjects[index]->isActive = false;
+	}
+}
+
+void UserInterface::EnableInterfaces(std::vector<int> indicies)
+{
+	for (int& index : indicies)
+	{
+		assert(index >= 0 && index < pObjects.size());
+		pObjects[index]->isActive = true;
+		drawFlag = true;
+	}
+}
+
+void UserInterface::DisableAll()
+{
+	for (auto& pObject : pObjects)
+	{
+		pObject->isActive = false;
+	}
+}
+
+void UserInterface::EnableAll()
+{
+	for (auto& pObject : pObjects)
+	{
+		pObject->isActive = true;
+	}
+	drawFlag = true;
+}
+
+bool UserInterface::InterfaceIsEnabled(int index) const
+{
+	assert(index >= 0 && index < pObjects.size());
+	return pObjects[index]->isActive;
 }
 
 void UserInterface::Update(float time_ellapsed)
 {
+	int id = 0;
 	for (auto& pObject : pObjects)
 	{
-		if (pObject->update)
+		if (pObject->update && pObject->isActive)
 		{
+			pObject->id = id;
+			++id;
 			if (pObject->update(pObject, time_ellapsed))
 			{
 				drawFlag = true;
@@ -35,10 +83,11 @@ void UserInterface::Draw()
 	{
 		for (auto& pObject : pObjects)
 		{
-			pObject->Draw(gfx, layer, gfcText);
+			if (pObject->isActive)
+			{
+				pObject->Draw(gfx, layer, gfcText);
+			}
 		}
 		drawFlag = false;
 	}
 }
-
-

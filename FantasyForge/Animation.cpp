@@ -1,16 +1,16 @@
 #include "Animation.h"
 
-Animation::Animation(Image sprite_sheet, int2 sprite_size, int2 sheet_dim, int fps)
+Animation::Animation(Image sprite_sheet, int2 sprite_size, int2 sheet_dim, float fps)
 	:
 	currentFrame(0),
 	frameWidth(sprite_size.x),
 	frameHeight(sprite_size.y),
 	nFrames(sheet_dim.x * sheet_dim.y),
 	currentFrameTime(0.0f),
-	secsPerFrame(1.0f / (float)fps)
+	secsPerFrame(1.0f / fps)
 {
-	assert(sprite_size.x * sheet_dim.x == sprite_sheet.GetWidth());
-	assert(sprite_size.y * sheet_dim.y == sprite_sheet.GetHeight());
+	assert(sprite_size.x * sheet_dim.x <= sprite_sheet.GetWidth());
+	assert(sprite_size.y * sheet_dim.y <= sprite_sheet.GetHeight());
 	frames.resize(nFrames);
 	for (int y = 0; y < sheet_dim.y; ++y)
 	{
@@ -61,9 +61,19 @@ float Animation::GetFPS() const
 	return 1.0f / secsPerFrame;
 }
 
-void Animation::SetFPS(int fps)
+void Animation::SetFPS(float fps)
 {
-	secsPerFrame = 1.0f / (float)fps;
+	secsPerFrame = 1.0f / fps;
+}
+
+const std::vector<Image>& Animation::GetFrames() const
+{
+	return frames;
+}
+
+std::vector<Image>& Animation::GetFrames()
+{
+	return frames;
 }
 
 const Image& Animation::GetCurrentFrame() const

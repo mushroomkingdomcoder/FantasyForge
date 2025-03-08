@@ -1,6 +1,7 @@
 #pragma once
 #include "GraphicText.h"
 #include "Sprite.h"
+#include "Clock.h"
 #include <functional>
 
 class UserInterface
@@ -9,9 +10,13 @@ public:
 	class Object
 	{
 		friend class UserInterface;
+	private:
+		bool isActive;
 	public:
+		int id;
 		int x;
 		int y;
+		Clock clock;
 		std::function<bool(std::unique_ptr<Object>&, float)> update;
 		char* pData;
 	public:
@@ -20,6 +25,8 @@ public:
 		Object operator =(const Object& obj) = delete;
 		Object(int x, int y, std::function<bool(std::unique_ptr<Object>&, float)> update = nullptr, char* pp_data = nullptr)
 			:
+			isActive(false),
+			id(-1),
 			x(x),
 			y(y),
 			update(update),
@@ -144,8 +151,13 @@ private:
 	bool drawFlag;
 public:
 	UserInterface() = delete;
-	UserInterface(Graphics& gfx, std::string text_font, char2 char_table_dim, int start_char, int layer = 0);
-	void AddInterface(std::unique_ptr<Object>& pInterface);
+	UserInterface(Graphics& gfx, std::wstring text_font, char2 char_table_dim, int start_char, int layer = 0);
+	void AddInterfaces(std::vector<std::unique_ptr<Object>*> ppInterfaces);
+	void DisableInterfaces(std::vector<int> indicies);
+	void EnableInterfaces(std::vector<int> indicies);
+	void DisableAll();
+	void EnableAll();
+	bool InterfaceIsEnabled(int index) const;
 	void Update(float time_ellapsed);
 	void Draw();
 };

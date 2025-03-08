@@ -66,5 +66,9 @@ public:
 	void LineFeedUp();
 	void LineFeedDown();
 	void ClearText();
+	void ResetDefaults();
 	~GraphicText();
 };
+
+
+

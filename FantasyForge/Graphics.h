@@ -113,7 +113,7 @@ private:
 			renderFlag(true),
 			width(width),
 			height(height),
-			nPixels(width* height),
+			nPixels(width * height),
 			nImageBytes(nPixels * sizeof(Color)),
 			nImagePitchBytes(width * sizeof(Color)),
 			position(0.0f, 0.0f),
@@ -133,13 +133,14 @@ private:
 	mutable D3D11_MAPPED_SUBRESOURCE msr = {};
 	std::vector<Layer> Layers;
 	float4 fBackgroundColorRGBA = { 0.0f,0.0f,0.0f,1.0f };
+	vec2 stretch = { 1.0f,1.0f };
 private:
 	void UpdateViewportsAndFrameManager(float win_x_scale, float win_y_scale);
 public:
 	Graphics() = delete;
 	Graphics(const Graphics& gfx) = delete;
 	Graphics operator =(const Graphics& gfx) = delete;
-	Graphics(HWND hWnd, int WindowWidth, int WindowHeight, std::vector<int2> display_layer_dims);
+	Graphics(HWND hWnd, int WindowWidth, int WindowHeight, std::vector<int2> display_layer_dims, bool alt_enter = false);
 	void NewFrame();
 	void EndFrame() const;
 	const bool& isAutoManaged(int layer = 0) const;
@@ -205,6 +206,7 @@ public:
 	void SetFullscreen();
 	void ExitFullscreen();
 	bool isFullscreen();
+	const vec2& GetStretch() const;
 	const int& GetWidth(int layer = 0) const;
 	const int& GetHeight(int layer = 0) const;
 	int GetViewWidth(int layer = 0) const;
@@ -247,4 +249,16 @@ public:
 	mat4 GetAspectCorrectionMatrix(int layer = 0) const;
 	mat3 GetWorldToPixelMapTransformMatrix(int layer = 0) const;
 	mat3 GetPixelMapToWorldTransformMatrix(int layer = 0) const;
+public:
+	static PSS& pss;
+	static VSS& vss;
 };
+inline PSS& Graphics::pss = PSS::Load();
+inline VSS& Graphics::vss = VSS::Load();
+
+
+
+
+
+
+

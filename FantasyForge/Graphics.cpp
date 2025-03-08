@@ -23,7 +23,7 @@ void Graphics::UpdateViewportsAndFrameManager(float win_x_scale, float win_y_sca
 	pPipeline->OMSetRenderTargets(1, pFrameBufferView.GetAddressOf(), nullptr);
 }
 
-Graphics::Graphics(HWND hWnd, int WindowWidth, int WindowHeight, std::vector<int2> display_layer_dims)
+Graphics::Graphics(HWND hWnd, int WindowWidth, int WindowHeight, std::vector<int2> display_layer_dims, bool alt_enter)
 {
 	for (const int2& dld : display_layer_dims)
 	{
@@ -127,7 +127,7 @@ Graphics::Graphics(HWND hWnd, int WindowWidth, int WindowHeight, std::vector<int
 	ied[1].InstanceDataStepRate = 0;
 	ied[1].SemanticIndex = 0;
 	ied[1].SemanticName = "TextureCoordinate";
-	GFXCHECK(pDevice->CreateInputLayout(ied, (UINT)std::size(ied), VSS::Default.GetByteCode(), VSS::Default.GetByteCodeSize(), &pILayout));
+	GFXCHECK(pDevice->CreateInputLayout(ied, (UINT)std::size(ied), vss.Default.GetByteCode(), vss.Default.GetByteCodeSize(), &pILayout));
 	pPipeline->IASetInputLayout(pILayout.Get());
 
 	ComPtr<ID3D11BlendState> pColorBlender = nullptr;
@@ -149,8 +149,8 @@ Graphics::Graphics(HWND hWnd, int WindowWidth, int WindowHeight, std::vector<int
 
 	for (Layer& layer : Layers)
 	{
-		GFXCHECK(pDevice->CreatePixelShader(PSS::Default.GetByteCode(), PSS::Default.GetByteCodeSize(), nullptr, &layer.pPShader));
-		GFXCHECK(pDevice->CreateVertexShader(VSS::Default.GetByteCode(), VSS::Default.GetByteCodeSize(), nullptr, &layer.pVShader));
+		GFXCHECK(pDevice->CreatePixelShader(pss.Default.GetByteCode(), pss.Default.GetByteCodeSize(), nullptr, &layer.pPShader));
+		GFXCHECK(pDevice->CreateVertexShader(vss.Default.GetByteCode(), vss.Default.GetByteCodeSize(), nullptr, &layer.pVShader));
 		D3D11_TEXTURE2D_DESC td = {};
 		td.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 		td.ArraySize = 1;
@@ -184,6 +184,17 @@ Graphics::Graphics(HWND hWnd, int WindowWidth, int WindowHeight, std::vector<int
 		layer.viewport.Height = (float)WindowHeight;
 		layer.viewport.MaxDepth = 1.0f;
 		layer.viewport.MinDepth = 0.0f;
+	}
+
+	if (!alt_enter)
+	{
+		ComPtr<IDXGIDevice> pDXGIDevice = nullptr;
+		GFXCHECK(pDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&pDXGIDevice));
+		ComPtr<IDXGIAdapter> pDXGIAdapter = nullptr;
+		GFXCHECK(pDXGIDevice->GetAdapter(&pDXGIAdapter));
+		ComPtr<IDXGIFactory> pDXGIFactory = nullptr;
+		GFXCHECK(pDXGIAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&pDXGIFactory));
+		pDXGIFactory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER);
 	}
 }
 
@@ -520,12 +531,15 @@ void Graphics::DrawCircle(int x, int y, int r, std::function<Color(int, int)> co
 
 void Graphics::SetFullscreen()
 {
+	vec2 old_view = GetViewDimensions_FLOAT();
 	GFXCHECK(pFrameManager->SetFullscreenState(true, nullptr));
+	stretch = GetViewDimensions_FLOAT() / old_view;
 }
 
 void Graphics::ExitFullscreen()
 {
 	GFXCHECK(pFrameManager->SetFullscreenState(false, nullptr));
+	stretch = { 1.0f,1.0f };
 }
 
 bool Graphics::isFullscreen()
@@ -533,6 +547,11 @@ bool Graphics::isFullscreen()
 	BOOL isFullscreen;
 	GFXCHECK(pFrameManager->GetFullscreenState(&isFullscreen, nullptr));
 	return isFullscreen;
+}
+
+const vec2& Graphics::GetStretch() const
+{
+	return stretch;
 }
 
 const int& Graphics::GetWidth(int layer) const

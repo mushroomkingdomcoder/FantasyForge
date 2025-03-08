@@ -21,7 +21,7 @@ GraphicText::GraphicText(Color* p_paper, int2 paper_dim)
 	TextTexture(),
 	isUsingTexture(TextTexture)
 {
-	Image defaultCharset = Image("charsets\\default.bmp");
+	Image defaultCharset = Image(L"charsets\\default.bmp");
 	CharBitmaps.resize(charTableDim.x * charTableDim.y);
 	for (std::vector<bool>& cb : CharBitmaps)
 	{
@@ -473,7 +473,27 @@ void GraphicText::ClearText()
 	Cursor = { tlMargins.x,tlMargins.y };
 }
 
+void GraphicText::ResetDefaults()
+{
+	SetTopLeftMargins({ 0,0 });
+	SetBottomRightMargins({ 0,0 });
+	SetTextScale(1);
+	ClearText();
+	SetSingleSpacing();
+	SetTextColor(Colors::White);
+	SetCursorPosition({ 0,0 });
+	SetAutoCursor();
+	SetLineFeed();
+	if (isUsingTextTexture())
+	{
+		UseTextTexture();
+	}
+}
+
 GraphicText::~GraphicText()
 {
 	pPaper = nullptr;
 }
+
+
+

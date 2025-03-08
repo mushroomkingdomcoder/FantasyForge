@@ -45,19 +45,19 @@ public:
 class PSS
 {
 public:
-	static Shader Default;
-	static Shader InverseColor;
-	static Shader Brightness;
-	static Shader Silhouette;
-	static Shader Mosaic;
-	static Shader CircularWindow;
-	static Shader RectWindow;
-	static Shader HFlip;
-	static Shader VFlip;
-	static Shader HVFlip;
-	static Shader PointLight;
-	static Shader Flashlight;
-	static Shader DirectionalLight;
+	Shader Default;
+	Shader InverseColor;
+	Shader Brightness;
+	Shader Silhouette;
+	Shader Mosaic;
+	Shader CircularWindow;
+	Shader RectWindow;
+	Shader HFlip;
+	Shader VFlip;
+	Shader HVFlip;
+	Shader PointLight;
+	Shader Flashlight;
+	Shader DirectionalLight;
 private:
 	PSS()
 	{
@@ -76,24 +76,12 @@ private:
 		DirectionalLight.	LoadShaderFile(	L"DirectionalLightPS.cso"	);
 	}
 public:
-	static void Load()
+	static PSS& Load()
 	{
 		static PSS pixelShaders;
+		return pixelShaders;
 	}
 };
-inline Shader PSS::Default;
-inline Shader PSS::InverseColor;
-inline Shader PSS::Brightness;
-inline Shader PSS::Silhouette;
-inline Shader PSS::Mosaic;
-inline Shader PSS::CircularWindow;
-inline Shader PSS::RectWindow;
-inline Shader PSS::HFlip;
-inline Shader PSS::VFlip;
-inline Shader PSS::HVFlip;
-inline Shader PSS::PointLight;
-inline Shader PSS::Flashlight;
-inline Shader PSS::DirectionalLight;
 
 /*
 
@@ -104,8 +92,8 @@ inline Shader PSS::DirectionalLight;
 class VSS
 {
 public:
-	static Shader Default;
-	static Shader Transform;
+	Shader Default;
+	Shader Transform;
 private:
 	VSS()
 	{
@@ -113,13 +101,12 @@ private:
 		Transform.			LoadShaderFile(	L"TransformVS.cso"		);
 	}
 public:
-	static void Load()
+	static VSS& Load()
 	{
 		static VSS vertexShaders;
+		return vertexShaders;
 	}
 };
-inline Shader VSS::Default;
-inline Shader VSS::Transform;
 
 /*
 
@@ -446,4 +433,3 @@ namespace CBUFs
 		};
 	}
 }
-

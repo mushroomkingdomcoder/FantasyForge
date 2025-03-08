@@ -119,7 +119,7 @@ public:
 		y = v4.y;
 		return *this;
 	}
-	Vector2D operator +(const Vector2D& v2) const
+	constexpr Vector2D operator +(const Vector2D& v2) const
 	{
 		return Vector2D(x + v2.x, y + v2.y);
 	}
@@ -127,7 +127,7 @@ public:
 	{
 		return *this = *this + v2;
 	}
-	Vector2D operator -(const Vector2D& v2) const
+	constexpr Vector2D operator -(const Vector2D& v2) const
 	{
 		return Vector2D(x - v2.x, y - v2.y);
 	}
@@ -135,7 +135,7 @@ public:
 	{
 		return *this = *this - v2;
 	}
-	Vector2D operator *(const Vector2D& scale) const
+	constexpr Vector2D operator *(const Vector2D& scale) const
 	{
 		return Vector2D(x * scale.x, y * scale.y);
 	}
@@ -143,7 +143,7 @@ public:
 	{
 		return *this = *this * scale;
 	}
-	Vector2D operator /(const Vector2D& inv_scale) const
+	constexpr Vector2D operator /(const Vector2D& inv_scale) const
 	{
 		return Vector2D(x / inv_scale.x, y / inv_scale.y);
 	}
@@ -151,7 +151,7 @@ public:
 	{
 		return *this = *this / inv_scale;
 	}
-	Vector2D operator *(const type& scale) const
+	constexpr Vector2D operator *(const type& scale) const
 	{
 		return Vector2D(x * scale, y * scale);
 	}
@@ -159,7 +159,7 @@ public:
 	{
 		return *this = *this * scale;
 	}
-	Vector2D operator /(const type& inv_scale) const
+	constexpr Vector2D operator /(const type& inv_scale) const
 	{
 		return Vector2D(x / inv_scale, y / inv_scale);
 	}
@@ -167,7 +167,7 @@ public:
 	{
 		return *this = *this / inv_scale;
 	}
-	Vector2D operator *(const Matrix2D<type>& mat2) const
+	constexpr Vector2D operator *(const Matrix2D<type>& mat2) const
 	{
 		Vector2D result = {};
 		for (int y = 0; y < 2; ++y)

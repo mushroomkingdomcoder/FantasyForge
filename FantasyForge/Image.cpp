@@ -37,7 +37,7 @@ Image::Image(int width, int height, Color color)
 	}
 }
 
-Image::Image(const char* filename)
+Image::Image(const wchar_t* filename)
 {
 	std::ifstream bitmapIN{ filename, std::ios::binary };
 	if (bitmapIN.fail())
@@ -129,6 +129,11 @@ int Image::GetWidth() const
 int Image::GetHeight() const
 {
 	return height;
+}
+
+vec2i Image::GetDimensions() const
+{
+	return vec2i(width, height);
 }
 
 iRect Image::GetRect(int x, int y) const
@@ -284,7 +289,7 @@ Image Image::AdjustedSize(float x_adjust, float y_adjust) const
 	const float yPxlsPerPxl = (float)height / newHeight;
 	for (int y = 0; y < adjusted.height; ++y)
 	{
-		for (int x = 0; x < adjusted.height; ++x)
+		for (int x = 0; x < adjusted.width; ++x)
 		{
 			adjusted.pImage[y * adjusted.width + x] = pImage[int((float)y * yPxlsPerPxl) * width + int((float)x * xPxlsPerPxl)];
 		}
@@ -487,12 +492,12 @@ Image& Image::Silhouette(const Color& background, const Color& silhouette)
 	return *this = this->Silhouetted(background, silhouette);
 }
 
-void Image::Load(const char* filename)
+Image& Image::Load(const wchar_t* filename)
 {
-	*this = Image(filename);
+	return (*this = Image(filename));
 }
 
-void Image::Save(const char* filename) const
+void Image::Save(const wchar_t* filename) const
 {
 	const int nPixels = width * height;
 	const int nImageBytes = nPixels * sizeof(Color);

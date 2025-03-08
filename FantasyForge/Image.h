@@ -16,10 +16,11 @@ public:
 	Image(const Image& image);
 	Image& operator =(const Image& image);
 	Image(int width, int height, Color color = Colors::White);
-	Image(const char* filename);
+	Image(const wchar_t* filename);
 	Image(const std::vector<Color>& image, int image_width);
 	int GetWidth() const;
 	int GetHeight() const;
+	vec2i GetDimensions() const;
 	iRect GetRect(int x = 0, int y = 0) const;
 	const Color* GetPtrToImage() const;
 	void SetPixel(int x, int y, const Color& color);
@@ -54,8 +55,8 @@ public:
 	Image& MakeMosaic(int2 img_divs);
 	Image Silhouetted(const Color& background, const Color& silhouette) const;
 	Image& Silhouette(const Color& background, const Color& silhouette);
-	void Load(const char* filename);
-	void Save(const char* filename) const;
+	Image& Load(const wchar_t* filename);
+	void Save(const wchar_t* filename) const;
 	void Import(const std::vector<Color>& image, int image_width);
 	std::vector<Color> Export() const;
 	void Draw(Graphics& gfx, int X, int Y, int layer = 0) const;

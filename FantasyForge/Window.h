@@ -2,51 +2,12 @@
 #include "Graphics.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "resource.h"
 #include <optional>
 #include <memory>
-#include "resource.h"
 
 class Window
 {
-private:
-	class WndClass
-	{
-	private:
-		const char* name = "FantasyForgeWnd";
-		HINSTANCE hInstance;
-	public:
-		WndClass()
-			:
-			hInstance(GetModuleHandle(NULL))
-		{
-			WNDCLASSEX wcd = {};
-			wcd.cbSize = sizeof(wcd);
-			wcd.lpfnWndProc = WndMsgSetup;
-			wcd.lpszClassName = name;
-			wcd.hInstance = hInstance;
-			wcd.cbClsExtra = 0;
-			wcd.cbWndExtra = 0;
-			wcd.hbrBackground = nullptr;
-			wcd.hCursor = nullptr;
-			wcd.hIcon = static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 32, 32, 0));
-			wcd.hIconSm = static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 16, 0));
-			wcd.lpszMenuName = nullptr;
-			wcd.style = CS_OWNDC | CS_DBLCLKS;
-			RegisterClassEx(&wcd);
-		}
-		const char* GetName() const
-		{
-			return name;
-		}
-		HINSTANCE GetInstance() const
-		{
-			return hInstance;
-		}
-		~WndClass()
-		{
-			UnregisterClass(name, hInstance);
-		}
-	};
 public:
 	class Exception : public BaseException
 	{
@@ -76,11 +37,63 @@ public:
 			return "FantasyForge Win32 Exception";
 		}
 	};
+	#define WNDEXCPT Window::Exception(__LINE__, __FILE__, GetLastError())
+	#define WNDEXCPT_NOTE(note) Window::Exception(__LINE__, __FILE__, GetLastError(), note)
+	#define WNDCHECK(rval) if (!rval) { throw WNDEXCPT; }
+private:
+	class WndClass
+	{
+	private:
+		const char* name = "FantasyForgeWnd";
+		HINSTANCE hInstance;
+	public:
+		WndClass()
+			:
+			hInstance(GetModuleHandle(NULL))
+		{
+			int2 iconDim = { 0,0 };
+			int2 iconDimS = { 0,0 };
+			WNDCHECK((iconDim.x = GetSystemMetrics(SM_CXICON)));
+			WNDCHECK((iconDim.y = GetSystemMetrics(SM_CYICON)));
+			WNDCHECK((iconDimS.x = GetSystemMetrics(SM_CXSMICON)));
+			WNDCHECK((iconDimS.y = GetSystemMetrics(SM_CYSMICON)));
+
+			WNDCLASSEX wcd = {};
+			wcd.cbSize = sizeof(wcd);
+			wcd.lpfnWndProc = WndMsgSetup;
+			wcd.lpszClassName = name;
+			wcd.hInstance = hInstance;
+			wcd.cbClsExtra = 0;
+			wcd.cbWndExtra = 0;
+			wcd.hbrBackground = nullptr;
+			wcd.hCursor = nullptr;
+			wcd.hIcon = static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, iconDim.x, iconDim.y, 0));
+			wcd.hIconSm = static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, iconDimS.x, iconDimS.y, 0));
+			wcd.lpszMenuName = nullptr;
+			wcd.style = CS_OWNDC | CS_DBLCLKS;
+			RegisterClassEx(&wcd);
+		}
+		const char* GetName() const
+		{
+			return name;
+		}
+		HINSTANCE GetInstance() const
+		{
+			return hInstance;
+		}
+		~WndClass()
+		{
+			UnregisterClass(name, hInstance);
+		}
+	};
 private:
 	HWND hWnd;
 	DWORD style;
 	int width;
+	int widthOG;
 	int height;
+	int heightOG;
+	vec2 stretch = { 1.0f,1.0f };
 	std::string title;
 	std::unique_ptr<Graphics> pGFX = nullptr;
 	bool pseudoFullscreen;
@@ -112,13 +125,15 @@ public:
 	int2 GetWindowPosition() const;
 	void SetWindowDimensions(int width, int height);
 	int2 GetWindowDimensions() const;
+	float GetAspectRatio();
+	const vec2& GetStretch() const;
 	void SetPseudoFullscreen();
+	void ResetWindow();
 	bool isPseudoFullscreen() const;
 	~Window();
 public:
 	static std::optional<int> ProcessMessages();
 };
 inline Window::WndClass Window::wndcls;
-
 
 
